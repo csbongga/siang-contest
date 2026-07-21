@@ -33,3 +33,7 @@ body {
   background-color: var(--color-aubergine);
   color: #ffffff;
 }
+
+input, select, textarea {
+  color: var(--color-aubergine);
+}
