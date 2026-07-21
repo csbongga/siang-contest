@@ -1,0 +1,297 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Navbar } from '@/components/Navbar';
+import { ScoreSlider } from '@/components/ScoreSlider';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
+
+type Judge = { id: string; name: string; pin: string | null };
+type Team = { id: string; name: string };
+
+export default function JudgePage() {
+  const [judges, setJudges] = useState<Judge[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  
+  const [selectedJudge, setSelectedJudge] = useState<string>('');
+  const [pinInput, setPinInput] = useState<string>('');
+  const [judgeVerified, setJudgeVerified] = useState(false);
+  
+  const [selectedTeam, setSelectedTeam] = useState<string>('');
+  const [scoredTeams, setScoredTeams] = useState<string[]>([]);
+  
+  const [scores, setScores] = useState({ c1: 0, c2: 0, c3: 0, c4: 0, c5: 0, c6: 0, c7: 0 });
+  const [note, setNote] = useState('');
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState<{type: 'success'|'error', text: string} | null>(null);
+
+  useEffect(() => {
+    fetch('/api/judges').then(res => res.json()).then(data => setJudges(data.judges || []));
+    fetch('/api/teams').then(res => res.json()).then(data => setTeams(data.teams || []));
+  }, []);
+
+  useEffect(() => {
+    if (judgeVerified && selectedJudge) {
+      fetch(`/api/scores?judge_id=${selectedJudge}`)
+        .then(res => res.json())
+        .then(data => setScoredTeams(data.scored_teams || []));
+    }
+  }, [judgeVerified, selectedJudge]);
+
+  useEffect(() => {
+    if (judgeVerified && selectedJudge && selectedTeam) {
+      // ดึงคะแนนเดิมมาแสดง
+      fetch(`/api/scores?judge_id=${selectedJudge}&team_id=${selectedTeam}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.score) {
+            setScores({
+              c1: data.score.c1, c2: data.score.c2, c3: data.score.c3,
+              c4: data.score.c4, c5: data.score.c5, c6: data.score.c6, c7: data.score.c7
+            });
+            setNote(data.score.note || '');
+          } else {
+            setScores({ c1: 0, c2: 0, c3: 0, c4: 0, c5: 0, c6: 0, c7: 0 });
+            setNote('');
+          }
+          setMessage(null);
+        });
+    }
+  }, [judgeVerified, selectedJudge, selectedTeam]);
+
+  const totalDancer = scores.c1 + scores.c2 + scores.c3 + scores.c4;
+  const totalSinger = scores.c5 + scores.c6 + scores.c7;
+  const grandTotal = totalDancer + totalSinger;
+
+  const handleVerify = (e: React.FormEvent) => {
+    e.preventDefault();
+    const judge = judges.find(j => j.id === selectedJudge);
+    if (!judge) return;
+    
+    if (judge.pin && judge.pin !== pinInput) {
+      setMessage({ type: 'error', text: 'PIN ไม่ถูกต้อง' });
+      return;
+    }
+    setJudgeVerified(true);
+    setMessage(null);
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/scores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          judge_id: selectedJudge,
+          team_id: selectedTeam,
+          ...scores,
+          note
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: 'บันทึกคะแนนเรียบร้อยแล้ว' });
+        if (!scoredTeams.includes(selectedTeam)) {
+          setScoredTeams([...scoredTeams, selectedTeam]);
+        }
+      } else {
+        setMessage({ type: 'error', text: data.error || 'เกิดข้อผิดพลาด' });
+      }
+    } catch (e) {
+      setMessage({ type: 'error', text: 'การเชื่อมต่อผิดพลาด' });
+    }
+    setIsSubmitting(false);
+  };
+
+  return (
+    <div className="pb-24">
+      <Navbar />
+      
+      <main className="max-w-2xl mx-auto px-4 py-8">
+        {!judgeVerified ? (
+          <div className="bg-cream text-aubergine p-6 rounded-2xl shadow-xl">
+            <h2 className="font-display text-2xl font-bold mb-6 text-center text-pink">เข้าสู่ระบบกรรมการ</h2>
+            <form onSubmit={handleVerify} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold mb-2">เลือกชื่อกรรมการ</label>
+                <select 
+                  className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink focus:border-pink bg-white"
+                  value={selectedJudge}
+                  onChange={(e) => setSelectedJudge(e.target.value)}
+                  required
+                >
+                  <option value="">-- กรุณาเลือก --</option>
+                  {judges.map(j => (
+                    <option key={j.id} value={j.id}>{j.name}</option>
+                  ))}
+                </select>
+              </div>
+              
+              {selectedJudge && judges.find(j => j.id === selectedJudge)?.pin && (
+                <div>
+                  <label className="block text-sm font-semibold mb-2">PIN ยืนยันตัวตน (4 หลัก)</label>
+                  <input 
+                    type="password"
+                    maxLength={4}
+                    pattern="[0-9]*"
+                    inputMode="numeric"
+                    className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink focus:border-pink"
+                    value={pinInput}
+                    onChange={(e) => setPinInput(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+              
+              {message?.type === 'error' && (
+                <div className="p-3 bg-red-100 text-red-700 rounded-lg flex items-center gap-2">
+                  <AlertCircle size={20} /> {message.text}
+                </div>
+              )}
+              
+              <button 
+                type="submit"
+                disabled={!selectedJudge}
+                className="w-full bg-pink hover:bg-pink/90 text-white font-bold py-3 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+              >
+                เข้าให้คะแนน
+              </button>
+            </form>
+          </div>
+        ) : (
+          <div className="space-y-8 animate-in fade-in duration-500">
+            <div className="flex justify-between items-center bg-white/10 p-4 rounded-xl border border-white/20">
+              <div>
+                <p className="text-sm text-cyan">กรรมการ</p>
+                <p className="font-display text-lg font-bold">{judges.find(j => j.id === selectedJudge)?.name}</p>
+              </div>
+              <button 
+                onClick={() => { setJudgeVerified(false); setPinInput(''); setSelectedJudge(''); setSelectedTeam(''); }}
+                className="text-sm bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors"
+              >
+                เปลี่ยนผู้ใช้
+              </button>
+            </div>
+
+            <div className="bg-cream text-aubergine p-6 rounded-2xl shadow-xl">
+              <label className="block text-lg font-display font-bold mb-3">เลือกทีมที่ต้องการให้คะแนน</label>
+              <select 
+                className="w-full p-4 text-lg rounded-xl border border-gray-300 focus:ring-2 focus:ring-pink focus:border-pink bg-white shadow-sm font-bold"
+                value={selectedTeam}
+                onChange={(e) => setSelectedTeam(e.target.value)}
+              >
+                <option value="">-- เลือกทีม --</option>
+                {teams.map(t => (
+                  <option key={t.id} value={t.id}>
+                    {t.name} {scoredTeams.includes(t.id) ? ' (ให้คะแนนแล้ว)' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedTeam && (
+              <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+                {message?.type === 'success' && (
+                  <div className="p-4 bg-green-100 text-green-800 rounded-xl flex items-center gap-3 shadow-sm border border-green-200">
+                    <CheckCircle2 className="text-green-600" />
+                    <span className="font-medium">{message.text}</span>
+                  </div>
+                )}
+                
+                <section>
+                  <div className="flex justify-between items-baseline mb-4 border-b border-white/20 pb-2">
+                    <h3 className="font-display text-2xl font-bold text-gold">A. การแสดงของ Dancer</h3>
+                    <div className="text-xl font-bold bg-white/10 px-3 py-1 rounded-lg">{totalDancer} / 70</div>
+                  </div>
+                  <div className="space-y-4">
+                    <ScoreSlider 
+                      label="1. ความพร้อมเพรียงของทีมเต้น" 
+                      description="ความแม่นยำของท่าเต้น • ความพร้อมเพรียง" 
+                      value={scores.c1} max={20} onChange={(v) => setScores(s => ({...s, c1: v}))} 
+                    />
+                    <ScoreSlider 
+                      label="2. ความสนุกสนานและสร้างบรรยากาศ" 
+                      description="ความคึกคักของโชว์ • สร้างสีสันและความตื่นเต้น" 
+                      value={scores.c2} max={20} onChange={(v) => setScores(s => ({...s, c2: v}))} 
+                    />
+                    <ScoreSlider 
+                      label="3. ความคิดสร้างสรรค์" 
+                      description="ออกแบบท่าเต้น • ใช้พื้นที่เวที • เอกลักษณ์ทีม" 
+                      value={scores.c3} max={15} onChange={(v) => setScores(s => ({...s, c3: v}))} 
+                    />
+                    <ScoreSlider 
+                      label="4. การแต่งกายและองค์ประกอบ" 
+                      description="ความสวยงาม • เหมาะกับเพลง • อุปกรณ์" 
+                      value={scores.c4} max={15} onChange={(v) => setScores(s => ({...s, c4: v}))} 
+                    />
+                  </div>
+                </section>
+
+                <section>
+                  <div className="flex justify-between items-baseline mb-4 border-b border-white/20 pb-2 mt-12">
+                    <h3 className="font-display text-2xl font-bold text-cyan">B. การแสดงของนักร้อง</h3>
+                    <div className="text-xl font-bold bg-white/10 px-3 py-1 rounded-lg">{totalSinger} / 30</div>
+                  </div>
+                  <div className="space-y-4">
+                    <ScoreSlider 
+                      label="5. คุณภาพการร้องเพลง" 
+                      description="น้ำเสียง • จังหวะ • ความถูกต้องของเนื้อร้อง" 
+                      value={scores.c5} max={15} onChange={(v) => setScores(s => ({...s, c5: v}))} 
+                    />
+                    <ScoreSlider 
+                      label="6. บุคลิกภาพและการสื่อสาร" 
+                      description="เอนเตอร์เทนผู้ชม • ความมั่นใจ • มีส่วนร่วม" 
+                      value={scores.c6} max={10} onChange={(v) => setScores(s => ({...s, c6: v}))} 
+                    />
+                    <ScoreSlider 
+                      label="7. ความเหมาะสมของการเลือกเพลง" 
+                      description="ความต่อเนื่องของโชว์ • สนุกและเร้าอารมณ์" 
+                      value={scores.c7} max={5} onChange={(v) => setScores(s => ({...s, c7: v}))} 
+                    />
+                  </div>
+                </section>
+
+                <section className="bg-cream text-aubergine p-6 rounded-2xl shadow-xl">
+                  <label className="block text-lg font-display font-bold mb-2">บันทึกเพิ่มเติม (Note)</label>
+                  <textarea 
+                    className="w-full p-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-pink focus:border-pink bg-white resize-none"
+                    rows={3}
+                    placeholder="ความเห็นเพิ่มเติมสำหรับทีมนี้..."
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                  ></textarea>
+                </section>
+
+                <div className="pt-6 pb-20">
+                  <button 
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className="w-full bg-gradient-to-r from-pink to-gold text-white font-display font-bold text-2xl py-5 rounded-2xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all disabled:opacity-70 disabled:scale-100 flex items-center justify-center gap-3"
+                  >
+                    {isSubmitting ? 'กำลังบันทึก...' : 'บันทึกคะแนน'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      {/* Floating Total Score Bar */}
+      {judgeVerified && selectedTeam && (
+        <div className="fixed bottom-0 left-0 right-0 bg-aubergine/95 backdrop-blur-md border-t border-white/20 p-4 shadow-[0_-10px_20px_rgba(0,0,0,0.3)] z-40 transform transition-transform">
+          <div className="max-w-2xl mx-auto flex justify-between items-center">
+            <span className="font-display font-bold text-xl text-gray-200">คะแนนรวมสุทธิ</span>
+            <div className="flex items-baseline gap-2">
+              <span className={`font-display font-black text-4xl ${grandTotal > 80 ? 'text-gold' : 'text-white'}`}>
+                {grandTotal}
+              </span>
+              <span className="text-gray-400 font-bold">/ 100</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
