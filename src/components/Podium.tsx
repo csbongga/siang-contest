@@ -20,7 +20,7 @@ export function Podium({ topTeams }: { topTeams: PodiumItemProps[] }) {
       {second && (
         <div className="flex flex-col items-center w-1/3 max-w-[120px]">
           <div className="text-center mb-2 px-1">
-            <p className="font-display font-bold text-sm sm:text-base text-gray-200 line-clamp-2 leading-tight">{second.teamName}</p>
+            <p className="font-display font-bold text-sm sm:text-base text-gray-700 line-clamp-2 leading-tight">{second.teamName}</p>
             <p className="text-gold font-bold">{second.score.toFixed(2)}</p>
           </div>
           <div className="w-full h-32 bg-gradient-to-t from-gray-700 to-gray-500 rounded-t-lg flex justify-center pt-2 shadow-lg relative overflow-hidden">
@@ -35,7 +35,7 @@ export function Podium({ topTeams }: { topTeams: PodiumItemProps[] }) {
         <div className="flex flex-col items-center w-1/3 max-w-[140px] z-10">
           <div className="text-center mb-2 px-1 animate-bounce-slow">
             <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-gold mx-auto mb-1 drop-shadow-glow" />
-            <p className="font-display font-bold text-base sm:text-lg text-white line-clamp-2 leading-tight">{first.teamName}</p>
+            <p className="font-display font-bold text-base sm:text-lg text-aubergine line-clamp-2 leading-tight">{first.teamName}</p>
             <p className="text-gold font-bold text-lg">{first.score.toFixed(2)}</p>
           </div>
           <div className="w-full h-40 bg-gradient-to-t from-gold/60 to-gold rounded-t-lg flex justify-center pt-2 shadow-[0_0_15px_rgba(245,179,1,0.5)] relative overflow-hidden">
@@ -49,7 +49,7 @@ export function Podium({ topTeams }: { topTeams: PodiumItemProps[] }) {
       {third && (
         <div className="flex flex-col items-center w-1/3 max-w-[120px]">
           <div className="text-center mb-2 px-1">
-            <p className="font-display font-bold text-sm sm:text-base text-orange-200 line-clamp-2 leading-tight">{third.teamName}</p>
+            <p className="font-display font-bold text-sm sm:text-base text-orange-900 line-clamp-2 leading-tight">{third.teamName}</p>
             <p className="text-gold font-bold">{third.score.toFixed(2)}</p>
           </div>
           <div className="w-full h-24 bg-gradient-to-t from-orange-900 to-orange-700 rounded-t-lg flex justify-center pt-2 shadow-lg relative overflow-hidden">
