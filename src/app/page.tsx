@@ -91,10 +91,12 @@ export default function JudgePage() {
       });
       const data = await res.json();
       if (data.success) {
-        setMessage({ type: 'success', text: 'บันทึกคะแนนเรียบร้อยแล้ว' });
+        setMessage({ type: 'success', text: 'บันทึกคะแนนเรียบร้อยแล้ว!' });
         if (!scoredTeams.includes(selectedTeam)) {
           setScoredTeams([...scoredTeams, selectedTeam]);
         }
+        // ซ่อนกล่องเด้งหลังจาก 3 วินาที
+        setTimeout(() => setMessage(null), 3000);
       } else {
         setMessage({ type: 'error', text: data.error || 'เกิดข้อผิดพลาด' });
       }
@@ -193,9 +195,11 @@ export default function JudgePage() {
             {selectedTeam && (
               <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
                 {message?.type === 'success' && (
-                  <div className="p-4 bg-green-100 text-green-800 rounded-xl flex items-center gap-3 shadow-sm border border-green-200">
-                    <CheckCircle2 className="text-green-600" />
-                    <span className="font-medium">{message.text}</span>
+                  <div className="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-top-10 fade-in duration-300">
+                    <div className="bg-green-500 text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 font-display font-bold text-xl border-4 border-white/30 backdrop-blur-sm">
+                      <CheckCircle2 size={28} />
+                      <span>{message.text}</span>
+                    </div>
                   </div>
                 )}
                 
