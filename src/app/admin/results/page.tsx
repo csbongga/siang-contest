@@ -59,9 +59,15 @@ export default function AdminResultsPage() {
       const teamScores = scores.filter((s: any) => s.team_id === t.id);
       let dancerSum = 0;
       let singerSum = 0;
+      let entertainSum = 0;
+      let costumeSum = 0;
+      let creativeSum = 0;
       if (teamScores.length > 0) {
         dancerSum = teamScores.reduce((acc: number, s: any) => acc + s.c1 + s.c2 + s.c3 + s.c4, 0) / teamScores.length;
         singerSum = teamScores.reduce((acc: number, s: any) => acc + s.c5 + s.c6 + s.c7, 0) / teamScores.length;
+        entertainSum = teamScores.reduce((acc: number, s: any) => acc + s.c2 + s.c6, 0) / teamScores.length;
+        costumeSum = teamScores.reduce((acc: number, s: any) => acc + s.c4 + s.c6, 0) / teamScores.length;
+        creativeSum = teamScores.reduce((acc: number, s: any) => acc + s.c3 + s.c7, 0) / teamScores.length;
       }
       
       const s1 = teamScore1[t.id] || 0;
@@ -77,18 +83,24 @@ export default function AdminResultsPage() {
         total: s1 + s2,
         popularVote,
         dancerScore: dancerSum,
-        singerScore: singerSum
+        singerScore: singerSum,
+        entertainScore: entertainSum,
+        costumeScore: costumeSum,
+        creativeScore: creativeSum
       };
     });
 
     finalResults.sort((a, b) => b.total - a.total);
     
-    // เรียง Popular Vote แยกลำดับ
+    // เรียงคะแนนพิเศษ
     const popVoteResults = [...finalResults].sort((a, b) => b.popularVote - a.popularVote);
     const dancerResults = [...finalResults].sort((a, b) => b.dancerScore - a.dancerScore);
     const singerResults = [...finalResults].sort((a, b) => b.singerScore - a.singerScore);
+    const entertainResults = [...finalResults].sort((a, b) => b.entertainScore - a.entertainScore);
+    const costumeResults = [...finalResults].sort((a, b) => b.costumeScore - a.costumeScore);
+    const creativeResults = [...finalResults].sort((a, b) => b.creativeScore - a.creativeScore);
 
-    setData({ results: finalResults, popularResults: popVoteResults, dancerResults, singerResults, state, isAllComplete: scores.length === teams.length * judges.length });
+    setData({ results: finalResults, popularResults: popVoteResults, dancerResults, singerResults, entertainResults, costumeResults, creativeResults, state, isAllComplete: scores.length === teams.length * judges.length });
   };
 
   useEffect(() => {
@@ -267,6 +279,80 @@ export default function AdminResultsPage() {
               <div key={r.id} className="flex justify-between items-center text-sm border-b border-white/20 pb-2">
                 <span>{idx + 2}. {r.name}</span>
                 <span className="font-bold">{r.singerScore.toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+        <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 shadow-xl text-white">
+          <h2 className="font-display text-2xl font-bold mb-4 flex items-center gap-2">
+            รางวัล เอ็นเตอร์เทน
+          </h2>
+          <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+            {data.entertainResults.length > 0 && (
+              <div className="text-center py-4">
+                <div className="text-sm font-bold text-indigo-200 mb-1">อันดับ 1</div>
+                <div className="text-3xl font-black mb-2">{data.entertainResults[0].name}</div>
+                <div className="text-lg">คะแนน: <span className="font-bold text-yellow-300">{data.entertainResults[0].entertainScore.toFixed(2)}</span> / 30</div>
+                <div className="text-xs text-white/70 mt-2">(คำนวณจาก C2 + C6)</div>
+              </div>
+            )}
+          </div>
+          <div className="mt-4 space-y-2">
+            {data.entertainResults.slice(1, 4).map((r: any, idx: number) => (
+              <div key={r.id} className="flex justify-between items-center text-sm border-b border-white/20 pb-2">
+                <span>{idx + 2}. {r.name}</span>
+                <span className="font-bold">{r.entertainScore.toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-fuchsia-500 to-pink-600 rounded-2xl p-6 shadow-xl text-white">
+          <h2 className="font-display text-2xl font-bold mb-4 flex items-center gap-2">
+            รางวัล แต่งกาย
+          </h2>
+          <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+            {data.costumeResults.length > 0 && (
+              <div className="text-center py-4">
+                <div className="text-sm font-bold text-fuchsia-200 mb-1">อันดับ 1</div>
+                <div className="text-3xl font-black mb-2">{data.costumeResults[0].name}</div>
+                <div className="text-lg">คะแนน: <span className="font-bold text-yellow-300">{data.costumeResults[0].costumeScore.toFixed(2)}</span> / 25</div>
+                <div className="text-xs text-white/70 mt-2">(คำนวณจาก C4 + C6)</div>
+              </div>
+            )}
+          </div>
+          <div className="mt-4 space-y-2">
+            {data.costumeResults.slice(1, 4).map((r: any, idx: number) => (
+              <div key={r.id} className="flex justify-between items-center text-sm border-b border-white/20 pb-2">
+                <span>{idx + 2}. {r.name}</span>
+                <span className="font-bold">{r.costumeScore.toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-6 shadow-xl text-white">
+          <h2 className="font-display text-2xl font-bold mb-4 flex items-center gap-2">
+            รางวัล สร้างสรรค์
+          </h2>
+          <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+            {data.creativeResults.length > 0 && (
+              <div className="text-center py-4">
+                <div className="text-sm font-bold text-orange-200 mb-1">อันดับ 1</div>
+                <div className="text-3xl font-black mb-2">{data.creativeResults[0].name}</div>
+                <div className="text-lg">คะแนน: <span className="font-bold text-yellow-300">{data.creativeResults[0].creativeScore.toFixed(2)}</span> / 20</div>
+                <div className="text-xs text-white/70 mt-2">(คำนวณจาก C3 + C7)</div>
+              </div>
+            )}
+          </div>
+          <div className="mt-4 space-y-2">
+            {data.creativeResults.slice(1, 4).map((r: any, idx: number) => (
+              <div key={r.id} className="flex justify-between items-center text-sm border-b border-white/20 pb-2">
+                <span>{idx + 2}. {r.name}</span>
+                <span className="font-bold">{r.creativeScore.toFixed(2)}</span>
               </div>
             ))}
           </div>

@@ -127,6 +127,16 @@ export default function ResultsPage() {
     rank: r.rank
   }));
 
+  const getTopTeam = (criteriaFunc: (r: AggregatedResult) => number) => {
+    const validTeams = results.filter(r => r.voteCount > 0);
+    if (validTeams.length === 0) return null;
+    return validTeams.reduce((prev, current) => (criteriaFunc(prev) > criteriaFunc(current)) ? prev : current);
+  };
+
+  const bestEntertainer = getTopTeam(r => r.avgC2 + r.avgC6);
+  const bestCostume = getTopTeam(r => r.avgC4 + r.avgC6);
+  const bestCreative = getTopTeam(r => r.avgC3 + r.avgC7);
+
   if (loading) {
     return (
       <div className="min-h-screen">
@@ -162,6 +172,32 @@ export default function ResultsPage() {
         ) : (
           <div className="bg-cream rounded-3xl p-8 text-center text-gray-500 mb-12">
             ยังไม่มีข้อมูลคะแนนเพียงพอสำหรับการจัดอันดับ
+          </div>
+        )}
+
+        {/* Special Awards */}
+        {bestEntertainer && bestCostume && bestCreative && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div className="bg-gradient-to-br from-pink to-purple-600 rounded-3xl p-6 shadow-xl text-white text-center transform hover:-translate-y-1 transition-transform">
+              <h3 className="text-sm font-bold text-pink-200 mb-2 uppercase tracking-wider">เอ็นเตอร์เทนยอดเยี่ยม</h3>
+              <div className="text-2xl font-display font-bold mb-2">{bestEntertainer.teamName}</div>
+              <div className="text-3xl font-black text-gold">{(bestEntertainer.avgC2 + bestEntertainer.avgC6).toFixed(2)}</div>
+              <p className="text-xs mt-2 text-pink-100">รวมคะแนน C2 + C6</p>
+            </div>
+            
+            <div className="bg-gradient-to-br from-cyan to-blue-600 rounded-3xl p-6 shadow-xl text-white text-center transform hover:-translate-y-1 transition-transform">
+              <h3 className="text-sm font-bold text-cyan-200 mb-2 uppercase tracking-wider">แต่งกายยอดเยี่ยม</h3>
+              <div className="text-2xl font-display font-bold mb-2">{bestCostume.teamName}</div>
+              <div className="text-3xl font-black text-gold">{(bestCostume.avgC4 + bestCostume.avgC6).toFixed(2)}</div>
+              <p className="text-xs mt-2 text-cyan-100">รวมคะแนน C4 + C6</p>
+            </div>
+            
+            <div className="bg-gradient-to-br from-gold to-orange-500 rounded-3xl p-6 shadow-xl text-white text-center transform hover:-translate-y-1 transition-transform">
+              <h3 className="text-sm font-bold text-yellow-100 mb-2 uppercase tracking-wider">สร้างสรรค์ยอดเยี่ยม</h3>
+              <div className="text-2xl font-display font-bold mb-2">{bestCreative.teamName}</div>
+              <div className="text-3xl font-black text-white">{(bestCreative.avgC3 + bestCreative.avgC7).toFixed(2)}</div>
+              <p className="text-xs mt-2 text-yellow-100">รวมคะแนน C3 + C7</p>
+            </div>
           </div>
         )}
 
