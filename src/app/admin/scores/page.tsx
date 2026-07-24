@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Lock, Unlock, Edit3, Trash2, AlertCircle, Save, X } from 'lucide-react';
 
-export default function AdminScoresPage() {
+function ScoresContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
@@ -293,5 +294,13 @@ export default function AdminScoresPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdminScoresPage() {
+  return (
+    <Suspense fallback={<div className="text-white text-center py-10">กำลังโหลด...</div>}>
+      <ScoresContent />
+    </Suspense>
   );
 }
