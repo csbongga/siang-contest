@@ -7,8 +7,11 @@ export async function middleware(request: NextRequest) {
 
   // Protect /admin and /admin/* except /admin/login
   const isAdminRoute = pathname.startsWith('/admin') && pathname !== '/admin/login';
-  // Protect /api/admin/* and /api/social and /api/report
-  const isAdminApiRoute = pathname.startsWith('/api/admin') || pathname.startsWith('/api/social') || pathname.startsWith('/api/report');
+  // Protect /api/admin/* and POST/DELETE to /api/social, /api/judges, /api/teams, /api/report
+  const isProtectedApiMethod = request.method !== 'GET';
+  const isProtectedApiRoute = pathname.startsWith('/api/social') || pathname.startsWith('/api/judges') || pathname.startsWith('/api/teams') || pathname.startsWith('/api/report');
+  
+  const isAdminApiRoute = pathname.startsWith('/api/admin') || (isProtectedApiRoute && isProtectedApiMethod);
 
   if (isAdminRoute || isAdminApiRoute) {
     const token = request.cookies.get('admin_token')?.value;

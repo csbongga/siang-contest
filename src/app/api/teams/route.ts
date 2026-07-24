@@ -13,11 +13,6 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    // Check admin auth
-    const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.ADMIN_PASSWORD}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const { id, name } = await request.json();
     if (!id || !name) {
@@ -34,10 +29,6 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.ADMIN_PASSWORD}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
