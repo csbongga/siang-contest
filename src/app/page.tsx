@@ -288,7 +288,7 @@ export default function JudgePage() {
                   <button 
                     onClick={handleConfirmClick}
                     disabled={isSubmitting}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-display font-bold text-2xl py-5 rounded-2xl shadow-lg transition-all disabled:opacity-70 flex items-center justify-center gap-3"
+                    className="w-full bg-gradient-to-r from-pink to-gold text-white font-display font-bold text-2xl py-5 rounded-2xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all disabled:opacity-70 disabled:scale-100 flex items-center justify-center gap-3"
                   >
                     {isSubmitting ? 'กำลังบันทึก...' : 'บันทึกคะแนน'}
                   </button>

@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-aubergine: #1e293b; /* slate-800 */
-  --color-gold: #334155;      /* slate-700 */
-  --color-pink: #2563eb;      /* blue-600 */
-  --color-cyan: #64748b;      /* slate-500 */
-  --color-cream: #ffffff;     /* white */
+  --color-aubergine: #1E0B2E;
+  --color-gold: #F5B301;
+  --color-pink: #E5197A;
+  --color-cyan: #16BDCA;
+  --color-cream: #FFFDF9;
   
   --font-sans: var(--font-sarabun);
   --font-display: var(--font-kanit);
@@ -30,8 +30,8 @@
 
 
 body {
-  background-color: #f8fafc; /* slate-50 */
-  color: #0f172a;            /* slate-900 */
+  background-color: var(--color-aubergine);
+  color: #ffffff;
 }
 
 input, select, textarea {

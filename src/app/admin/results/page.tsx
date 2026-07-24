@@ -202,23 +202,23 @@ export default function AdminResultsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-md text-slate-800">
-          <h2 className="font-display text-xl font-bold mb-4 flex items-center gap-2 text-pink">
+        <div className="bg-gradient-to-br from-pink to-purple-600 rounded-2xl p-6 shadow-xl text-white">
+          <h2 className="font-display text-2xl font-bold mb-4 flex items-center gap-2">
             <Heart className="fill-current" /> รางวัล Popular Vote
           </h2>
-          <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+          <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
             {data.popularResults.length > 0 && (
               <div className="text-center py-4">
-                <div className="text-sm font-bold text-gray-500 mb-1">อันดับ 1</div>
-                <div className="text-3xl font-black mb-2 text-slate-800">{data.popularResults[0].name}</div>
-                <div className="text-lg text-slate-600">คะแนนความนิยม: <span className="font-bold text-pink">{data.popularResults[0].popularVote}</span> คะแนน</div>
-                <div className="text-xs text-gray-400 mt-2">(คำนวณจาก Like x1, Comment x2, Share x3)</div>
+                <div className="text-sm font-bold text-pink-200 mb-1">อันดับ 1</div>
+                <div className="text-3xl font-black mb-2">{data.popularResults[0].name}</div>
+                <div className="text-lg">คะแนนความนิยม: <span className="font-bold text-yellow-300">{data.popularResults[0].popularVote}</span> คะแนน</div>
+                <div className="text-xs text-white/70 mt-2">(คำนวณจาก Like x1, Comment x2, Share x3)</div>
               </div>
             )}
           </div>
-          <div className="mt-4 space-y-2 text-slate-600">
+          <div className="mt-4 space-y-2">
             {data.popularResults.slice(1, 4).map((r: any, idx: number) => (
-              <div key={r.id} className="flex justify-between items-center text-sm border-b border-gray-100 pb-2">
+              <div key={r.id} className="flex justify-between items-center text-sm border-b border-white/20 pb-2">
                 <span>{idx + 2}. {r.name}</span>
                 <span className="font-bold">{r.popularVote} pts</span>
               </div>
@@ -226,22 +226,22 @@ export default function AdminResultsPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-md text-slate-800">
-          <h2 className="font-display text-xl font-bold mb-4 flex items-center gap-2 text-blue-600">
+        <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl p-6 shadow-xl text-white">
+          <h2 className="font-display text-2xl font-bold mb-4 flex items-center gap-2">
             รางวัล การเต้น
           </h2>
-          <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+          <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
             {data.dancerResults.length > 0 && (
               <div className="text-center py-4">
-                <div className="text-sm font-bold text-gray-500 mb-1">อันดับ 1</div>
-                <div className="text-3xl font-black mb-2 text-slate-800">{data.dancerResults[0].name}</div>
-                <div className="text-lg text-slate-600">คะแนนการเต้น: <span className="font-bold text-blue-600">{data.dancerResults[0].dancerScore.toFixed(2)}</span> / 70</div>
+                <div className="text-sm font-bold text-blue-200 mb-1">อันดับ 1</div>
+                <div className="text-3xl font-black mb-2">{data.dancerResults[0].name}</div>
+                <div className="text-lg">คะแนนการเต้น: <span className="font-bold text-yellow-300">{data.dancerResults[0].dancerScore.toFixed(2)}</span> / 70</div>
               </div>
             )}
           </div>
-          <div className="mt-4 space-y-2 text-slate-600">
+          <div className="mt-4 space-y-2">
             {data.dancerResults.slice(1, 4).map((r: any, idx: number) => (
-              <div key={r.id} className="flex justify-between items-center text-sm border-b border-gray-100 pb-2">
+              <div key={r.id} className="flex justify-between items-center text-sm border-b border-white/20 pb-2">
                 <span>{idx + 2}. {r.name}</span>
                 <span className="font-bold">{r.dancerScore.toFixed(2)}</span>
               </div>
@@ -249,22 +249,22 @@ export default function AdminResultsPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-md text-slate-800">
-          <h2 className="font-display text-xl font-bold mb-4 flex items-center gap-2 text-emerald-600">
+        <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 shadow-xl text-white">
+          <h2 className="font-display text-2xl font-bold mb-4 flex items-center gap-2">
             รางวัล การร้อง
           </h2>
-          <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+          <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
             {data.singerResults.length > 0 && (
               <div className="text-center py-4">
-                <div className="text-sm font-bold text-gray-500 mb-1">อันดับ 1</div>
-                <div className="text-3xl font-black mb-2 text-slate-800">{data.singerResults[0].name}</div>
-                <div className="text-lg text-slate-600">คะแนนการร้อง: <span className="font-bold text-emerald-600">{data.singerResults[0].singerScore.toFixed(2)}</span> / 30</div>
+                <div className="text-sm font-bold text-emerald-200 mb-1">อันดับ 1</div>
+                <div className="text-3xl font-black mb-2">{data.singerResults[0].name}</div>
+                <div className="text-lg">คะแนนการร้อง: <span className="font-bold text-yellow-300">{data.singerResults[0].singerScore.toFixed(2)}</span> / 30</div>
               </div>
             )}
           </div>
-          <div className="mt-4 space-y-2 text-slate-600">
+          <div className="mt-4 space-y-2">
             {data.singerResults.slice(1, 4).map((r: any, idx: number) => (
-              <div key={r.id} className="flex justify-between items-center text-sm border-b border-gray-100 pb-2">
+              <div key={r.id} className="flex justify-between items-center text-sm border-b border-white/20 pb-2">
                 <span>{idx + 2}. {r.name}</span>
                 <span className="font-bold">{r.singerScore.toFixed(2)}</span>
               </div>
