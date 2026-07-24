@@ -3,13 +3,11 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
-    const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.ADMIN_PASSWORD}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+    // Authentication is handled by middleware
+    
     // ล้างคะแนนทั้งหมด
     await sql`TRUNCATE TABLE scores`;
+    await sql`TRUNCATE TABLE social_votes`;
     
     return NextResponse.json({ success: true });
   } catch (error) {
