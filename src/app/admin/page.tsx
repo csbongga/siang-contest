@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, AlertTriangle, Lock, Unlock, Clock, AlertCircle } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, Lock, Unlock, Clock, AlertCircle, XCircle } from 'lucide-react';
 
 type Judge = { id: string; name: string };
 type Team = { id: string; name: string };
@@ -170,8 +170,8 @@ export default function AdminDashboard() {
                         </div>
                       )}
                       {status === 'none' && (
-                        <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 text-gray-400 rounded-full" title="ยังไม่ส่ง">
-                          <Clock size={18} />
+                        <div className="inline-flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-full" title="ยังไม่ส่ง">
+                          <XCircle size={18} />
                         </div>
                       )}
                     </td>
@@ -193,8 +193,8 @@ export default function AdminDashboard() {
                             <CheckCircle2 size={18} />
                           </div>
                         ) : (
-                          <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 text-gray-400 rounded-full" title="ยังไม่กรอก">
-                            <Clock size={18} />
+                          <div className="inline-flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-full" title="ยังไม่กรอก">
+                            <XCircle size={18} />
                           </div>
                         )}
                       </td>
@@ -207,8 +207,8 @@ export default function AdminDashboard() {
                             <CheckCircle2 size={18} />
                           </div>
                         ) : (
-                          <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 text-gray-400 rounded-full" title="ยังไม่กรอก">
-                            <Clock size={18} />
+                          <div className="inline-flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-full" title="ยังไม่กรอก">
+                            <XCircle size={18} />
                           </div>
                         )}
                       </td>
@@ -223,7 +223,7 @@ export default function AdminDashboard() {
         <div className="mt-4 flex gap-4 text-sm font-medium justify-center bg-gray-50 p-3 rounded-lg border border-gray-200">
           <div className="flex items-center gap-1"><div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center text-green-600"><CheckCircle2 size={10} /></div> ส่งแล้ว (ล็อก)</div>
           <div className="flex items-center gap-1"><div className="w-4 h-4 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600"><Unlock size={10} /></div> ปลดล็อกรอส่งใหม่</div>
-          <div className="flex items-center gap-1"><div className="w-4 h-4 bg-gray-100 rounded-full flex items-center justify-center text-gray-400"><Clock size={10} /></div> ยังไม่ส่ง</div>
+          <div className="flex items-center gap-1"><div className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center text-red-600"><XCircle size={10} /></div> ยังไม่ส่ง/ยังไม่กรอก</div>
         </div>
       </div>
     </div>
