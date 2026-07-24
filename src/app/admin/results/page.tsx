@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Trophy, Lock, Unlock, AlertCircle } from 'lucide-react';
+import { Trophy, Lock, Unlock, AlertCircle, Heart } from 'lucide-react';
 
 export default function AdminResultsPage() {
   const [data, setData] = useState<any>(null);

@@ -33,7 +33,7 @@ export default function AdminAnnouncePage() {
       }
 
       // 2. คำนวณคะแนนพวงมาลัย (20%)
-      const socialRanked = [...socials].sort((a, b) => b.garlands - a.garlands);
+      const socialRanked = [...socials].sort((a: any, b: any) => b.garlands - a.garlands);
       const teamScore2: Record<string, number> = {};
       let currentRank = 1;
       let currentScore = 20;
@@ -53,22 +53,27 @@ export default function AdminAnnouncePage() {
         return {
           id: team.id,
           name: team.name,
+          score1: s1,
+          score2: s2,
           total: s1 + s2
         };
-      });
-
-      finalResults.sort((a, b) => b.total - a.total);
+      }).sort((a: any, b: any) => b.total - a.total);
       
+      // 3) Find Social Award (Highest score2)
+      let topSocial = [...finalResults].sort((a: any, b: any) => b.score2 - a.score2)[0];
+      const allSocialScores = finalResults.map((team: any) => team.score2);
+      const socialIsTie = allSocialScores.filter((s: any) => s === topSocial?.score2).length > 1;
+
       // Calculate Popular Vote
-      const popVoteResults = teams.map(team => {
-        const socData = socials.find(s => s.team_id === team.id) || { likes: 0, comments: 0, shares: 0 };
+      const popVoteResults = teams.map((team: any) => {
+        const socData = socials.find((s: any) => s.team_id === team.id) || { likes: 0, comments: 0, shares: 0 };
         return {
           id: team.id,
           name: team.name,
           popularVote: (socData.likes * 1) + (socData.comments * 2) + (socData.shares * 3)
         };
       });
-      popVoteResults.sort((a, b) => b.popularVote - a.popularVote);
+      popVoteResults.sort((a: any, b: any) => b.popularVote - a.popularVote);
 
       setData({
         champion: finalResults[0],
