@@ -123,17 +123,20 @@ export default function AdminDashboard() {
               <th className="p-3 border border-gray-200 font-bold whitespace-nowrap sticky left-0 bg-gray-100 z-10">ทีม / กรรมการ</th>
               {judges.map(j => (
                 <th key={j.id} className="p-3 border border-gray-200 font-bold text-center">
-                  <div className="text-xs text-pink">[{j.id}]</div>
+                  <div className="text-xs text-blue-600">[{j.id}]</div>
                   {j.name}
                 </th>
               ))}
+              <th className="p-3 border border-gray-200 font-bold text-center bg-blue-50/50">
+                โซเชียล & พวงมาลัย
+              </th>
             </tr>
           </thead>
           <tbody>
             {teams.map(t => (
               <tr key={t.id} className="hover:bg-gray-50">
                 <td className="p-3 border border-gray-200 font-medium sticky left-0 bg-white group-hover:bg-gray-50 z-10">
-                  <span className="text-xs text-pink mr-1">[{t.id}]</span> {t.name}
+                  <span className="text-xs text-blue-600 mr-1">[{t.id}]</span> {t.name}
                 </td>
                 {judges.map(j => {
                   const score = scores.find(s => s.team_id === t.id && s.judge_id === j.id);
@@ -166,6 +169,20 @@ export default function AdminDashboard() {
                     </td>
                   );
                 })}
+                <td 
+                  className="p-3 border border-gray-200 text-center cursor-pointer transition-colors hover:bg-blue-50 bg-blue-50/30"
+                  onClick={() => router.push(`/admin/social`)}
+                >
+                  {socials.some(s => s.team_id === t.id) ? (
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-green-100 text-green-600 rounded-full" title="กรอกข้อมูลแล้ว">
+                      <CheckCircle2 size={18} />
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 text-gray-400 rounded-full" title="ยังไม่กรอกข้อมูล">
+                      <Clock size={18} />
+                    </div>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
