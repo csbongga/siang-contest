@@ -11,9 +11,7 @@ export function Navbar() {
           <span className="font-display font-bold text-xl text-white">เสียงอยู่ไส Contest</span>
         </Link>
         <div className="flex gap-4">
-          <Link href="/results" className="text-cyan hover:text-gold transition-colors font-medium">
-            ผลคะแนน
-          </Link>
+          {/* ลิงก์ผลคะแนนถูกเอาออกตามคำขอ */}
         </div>
       </div>
     </nav>
