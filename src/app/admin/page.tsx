@@ -7,7 +7,7 @@ import { CheckCircle2, AlertTriangle, Lock, Unlock, Clock, AlertCircle } from 'l
 type Judge = { id: string; name: string };
 type Team = { id: string; name: string };
 type Score = { judge_id: string; team_id: string; is_locked: boolean; submitted_at: string };
-type Social = { team_id: string };
+type Social = { team_id: string; garlands: number; likes: number; comments: number; shares: number; };
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -53,7 +53,12 @@ export default function AdminDashboard() {
   const totalExpected = teams.length * judges.length;
   const totalSubmitted = scores.length;
   const fullyScoredTeams = teams.filter(t => scores.filter(s => s.team_id === t.id).length === judges.length).length;
-  const isAllSocialsEntered = socials.length === teams.length;
+  
+  const completedSocialsCount = teams.filter(t => {
+    const s = socials.find(soc => soc.team_id === t.id);
+    return s && s.garlands > 0 && (s.likes > 0 || s.comments > 0 || s.shares > 0);
+  }).length;
+  const isAllSocialsEntered = completedSocialsCount === teams.length;
 
   return (
     <div className="space-y-6">
@@ -94,7 +99,7 @@ export default function AdminDashboard() {
               </span>
             ) : (
               <span className="bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 border border-orange-500/30">
-                <AlertTriangle size={16} /> ขาดอีก {teams.length - socials.length} ทีม
+                <AlertTriangle size={16} /> ขาดอีก {teams.length - completedSocialsCount} ทีม
               </span>
             )}
           </div>
@@ -127,8 +132,11 @@ export default function AdminDashboard() {
                   {j.name}
                 </th>
               ))}
+              <th className="p-3 border border-gray-200 font-bold text-center bg-yellow-50/50">
+                พวงมาลัย
+              </th>
               <th className="p-3 border border-gray-200 font-bold text-center bg-blue-50/50">
-                โซเชียล & พวงมาลัย
+                โซเชียล
               </th>
             </tr>
           </thead>
@@ -169,20 +177,44 @@ export default function AdminDashboard() {
                     </td>
                   );
                 })}
-                <td 
-                  className="p-3 border border-gray-200 text-center cursor-pointer transition-colors hover:bg-blue-50 bg-blue-50/30"
-                  onClick={() => router.push(`/admin/social`)}
-                >
-                  {socials.some(s => s.team_id === t.id) ? (
-                    <div className="inline-flex items-center justify-center w-8 h-8 bg-green-100 text-green-600 rounded-full" title="กรอกข้อมูลแล้ว">
-                      <CheckCircle2 size={18} />
-                    </div>
-                  ) : (
-                    <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 text-gray-400 rounded-full" title="ยังไม่กรอกข้อมูล">
-                      <Clock size={18} />
-                    </div>
-                  )}
-                </td>
+                {(() => {
+                  const s = socials.find(soc => soc.team_id === t.id);
+                  const hasGarland = s && s.garlands > 0;
+                  const hasSocial = s && (s.likes > 0 || s.comments > 0 || s.shares > 0);
+                  
+                  return (
+                    <>
+                      <td 
+                        className="p-3 border border-gray-200 text-center cursor-pointer transition-colors hover:bg-yellow-50 bg-yellow-50/30"
+                        onClick={() => router.push(`/admin/garland`)}
+                      >
+                        {hasGarland ? (
+                          <div className="inline-flex items-center justify-center w-8 h-8 bg-green-100 text-green-600 rounded-full" title="กรอกแล้ว">
+                            <CheckCircle2 size={18} />
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 text-gray-400 rounded-full" title="ยังไม่กรอก">
+                            <Clock size={18} />
+                          </div>
+                        )}
+                      </td>
+                      <td 
+                        className="p-3 border border-gray-200 text-center cursor-pointer transition-colors hover:bg-blue-50 bg-blue-50/30"
+                        onClick={() => router.push(`/admin/social`)}
+                      >
+                        {hasSocial ? (
+                          <div className="inline-flex items-center justify-center w-8 h-8 bg-green-100 text-green-600 rounded-full" title="กรอกแล้ว">
+                            <CheckCircle2 size={18} />
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 text-gray-400 rounded-full" title="ยังไม่กรอก">
+                            <Clock size={18} />
+                          </div>
+                        )}
+                      </td>
+                    </>
+                  );
+                })()}
               </tr>
             ))}
           </tbody>
