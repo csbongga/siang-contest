@@ -175,14 +175,14 @@ export default function AdminResultsPage() {
             </thead>
             <tbody>
               {data.results.map((r: any, idx: number) => {
-                let rowStyle = 'hover:bg-gray-50 bg-white';
+                let rowStyle = 'hover:bg-gray-50 bg-white text-gray-900';
                 let rankTrophy = null;
                 
                 if (idx === 0) { rowStyle = 'bg-yellow-50 hover:bg-yellow-100 text-yellow-900 font-bold'; rankTrophy = <Trophy className="text-yellow-500 mx-auto" />; }
                 else if (idx === 1) { rowStyle = 'bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold'; rankTrophy = <Trophy className="text-gray-400 mx-auto" />; }
                 else if (idx === 2) { rowStyle = 'bg-orange-50 hover:bg-orange-100 text-orange-800 font-bold'; rankTrophy = <Trophy className="text-orange-500 mx-auto" />; }
-                else if (idx === 3) { rowStyle = 'bg-pink/5 hover:bg-pink/10 font-bold'; } // ชมเชย 1
-                else if (idx === 4) { rowStyle = 'bg-pink/5 hover:bg-pink/10 font-bold'; } // ชมเชย 2
+                else if (idx === 3) { rowStyle = 'bg-pink/5 hover:bg-pink/10 font-bold text-pink-900'; } // ชมเชย 1
+                else if (idx === 4) { rowStyle = 'bg-pink/5 hover:bg-pink/10 font-bold text-pink-900'; } // ชมเชย 2
 
                 return (
                   <tr key={r.id} className={`border-b border-gray-200 transition-colors ${rowStyle}`}>
