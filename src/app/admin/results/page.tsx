@@ -56,6 +56,14 @@ export default function AdminResultsPage() {
     }
 
     const finalResults = teams.map(t => {
+      const teamScores = scores.filter((s: any) => s.team_id === t.id);
+      let dancerSum = 0;
+      let singerSum = 0;
+      if (teamScores.length > 0) {
+        dancerSum = teamScores.reduce((acc: number, s: any) => acc + s.c1 + s.c2 + s.c3 + s.c4, 0) / teamScores.length;
+        singerSum = teamScores.reduce((acc: number, s: any) => acc + s.c5 + s.c6 + s.c7, 0) / teamScores.length;
+      }
+      
       const s1 = teamScore1[t.id] || 0;
       const s2 = teamScore2[t.id] || 0;
       const soc = socials.find(s => s.team_id === t.id) || { likes: 0, comments: 0, shares: 0 };
@@ -67,7 +75,9 @@ export default function AdminResultsPage() {
         score1: s1,
         score2: s2,
         total: s1 + s2,
-        popularVote
+        popularVote,
+        dancerScore: dancerSum,
+        singerScore: singerSum
       };
     });
 
@@ -75,8 +85,10 @@ export default function AdminResultsPage() {
     
     // เรียง Popular Vote แยกลำดับ
     const popVoteResults = [...finalResults].sort((a, b) => b.popularVote - a.popularVote);
+    const dancerResults = [...finalResults].sort((a, b) => b.dancerScore - a.dancerScore);
+    const singerResults = [...finalResults].sort((a, b) => b.singerScore - a.singerScore);
 
-    setData({ results: finalResults, popularResults: popVoteResults, state, isAllComplete: scores.length === teams.length * judges.length });
+    setData({ results: finalResults, popularResults: popVoteResults, dancerResults, singerResults, state, isAllComplete: scores.length === teams.length * judges.length });
   };
 
   useEffect(() => {
@@ -189,7 +201,7 @@ export default function AdminResultsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
         <div className="bg-gradient-to-br from-pink to-purple-600 rounded-2xl p-6 shadow-xl text-white">
           <h2 className="font-display text-2xl font-bold mb-4 flex items-center gap-2">
             <Heart className="fill-current" /> รางวัล Popular Vote
@@ -209,6 +221,52 @@ export default function AdminResultsPage() {
               <div key={r.id} className="flex justify-between items-center text-sm border-b border-white/20 pb-2">
                 <span>{idx + 2}. {r.name}</span>
                 <span className="font-bold">{r.popularVote} pts</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl p-6 shadow-xl text-white">
+          <h2 className="font-display text-2xl font-bold mb-4 flex items-center gap-2">
+            รางวัล การเต้น
+          </h2>
+          <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+            {data.dancerResults.length > 0 && (
+              <div className="text-center py-4">
+                <div className="text-sm font-bold text-blue-200 mb-1">อันดับ 1</div>
+                <div className="text-3xl font-black mb-2">{data.dancerResults[0].name}</div>
+                <div className="text-lg">คะแนนการเต้น: <span className="font-bold text-yellow-300">{data.dancerResults[0].dancerScore.toFixed(2)}</span> / 70</div>
+              </div>
+            )}
+          </div>
+          <div className="mt-4 space-y-2">
+            {data.dancerResults.slice(1, 4).map((r: any, idx: number) => (
+              <div key={r.id} className="flex justify-between items-center text-sm border-b border-white/20 pb-2">
+                <span>{idx + 2}. {r.name}</span>
+                <span className="font-bold">{r.dancerScore.toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 shadow-xl text-white">
+          <h2 className="font-display text-2xl font-bold mb-4 flex items-center gap-2">
+            รางวัล การร้อง
+          </h2>
+          <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+            {data.singerResults.length > 0 && (
+              <div className="text-center py-4">
+                <div className="text-sm font-bold text-emerald-200 mb-1">อันดับ 1</div>
+                <div className="text-3xl font-black mb-2">{data.singerResults[0].name}</div>
+                <div className="text-lg">คะแนนการร้อง: <span className="font-bold text-yellow-300">{data.singerResults[0].singerScore.toFixed(2)}</span> / 30</div>
+              </div>
+            )}
+          </div>
+          <div className="mt-4 space-y-2">
+            {data.singerResults.slice(1, 4).map((r: any, idx: number) => (
+              <div key={r.id} className="flex justify-between items-center text-sm border-b border-white/20 pb-2">
+                <span>{idx + 2}. {r.name}</span>
+                <span className="font-bold">{r.singerScore.toFixed(2)}</span>
               </div>
             ))}
           </div>
