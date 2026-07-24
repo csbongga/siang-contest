@@ -47,7 +47,7 @@ export default function AdminAnnouncePage() {
         teamScore2[socialRanked[i].team_id] = currentScore;
       }
 
-      const finalResults = teams.map(team => {
+      const finalResults = teams.map((team: any) => {
         const s1 = teamScore1[team.id] || 0;
         const s2 = teamScore2[team.id] || 0;
         return {
