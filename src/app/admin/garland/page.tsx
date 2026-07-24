@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Save, AlertCircle } from 'lucide-react';
 
-export default function AdminSocialPage() {
+export default function AdminGarlandPage() {
   const [teams, setTeams] = useState<any[]>([]);
   const [socialData, setSocialData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
@@ -94,8 +94,8 @@ export default function AdminSocialPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="font-display text-3xl font-bold text-gold">กรอกคะแนนโซเชียล</h1>
-          <p className="text-gray-300 mt-1">ไลก์, คอมเมนต์, แชร์ (Popular Vote)</p>
+          <h1 className="font-display text-3xl font-bold text-gold">กรอกคะแนนพวงมาลัย</h1>
+          <p className="text-gray-300 mt-1">คะแนนพวงมาลัยหน้างาน</p>
         </div>
         <button 
           onClick={handleSave}
@@ -125,11 +125,8 @@ export default function AdminSocialPage() {
             <thead>
               <tr className="bg-gray-100 border-b border-gray-200 text-center">
                 <th className="p-4 font-bold text-left">ทีม</th>
-                <th className="p-4 font-bold">ไลก์ (x1)</th>
-                <th className="p-4 font-bold">คอมเมนต์ (x2)</th>
-                <th className="p-4 font-bold">แชร์ (x3)</th>
-                <th className="p-4 font-bold bg-pink/5 text-pink border-l border-gray-200">
-                  คะแนนรวม Popular Vote
+                <th className="p-4 font-bold bg-yellow-50 text-yellow-800 border-l border-r border-gray-200">
+                  พวงมาลัย<br/><span className="text-xs font-normal">(คิด 20% อันดับ 1 ได้ 20)</span>
                 </th>
               </tr>
             </thead>
@@ -144,35 +141,14 @@ export default function AdminSocialPage() {
                       <span className="text-xs text-pink mr-2">[{t.id}]</span>
                       {t.name}
                     </td>
-                    <td className="p-4">
+                    <td className="p-4 border-l border-r border-gray-100 bg-yellow-50/30">
                       <input 
                         type="number" min="0"
-                        className="w-full p-2 text-center rounded border border-gray-300 focus:ring-2 focus:ring-pink"
-                        value={s.likes || ''}
-                        onChange={(e) => handleInputChange(t.id, 'likes', e.target.value)}
+                        className="w-full p-2 text-center rounded border border-gray-300 focus:ring-2 focus:ring-yellow-400"
+                        value={s.garlands || ''}
+                        onChange={(e) => handleInputChange(t.id, 'garlands', e.target.value)}
                         disabled={isFinalized}
                       />
-                    </td>
-                    <td className="p-4">
-                      <input 
-                        type="number" min="0"
-                        className="w-full p-2 text-center rounded border border-gray-300 focus:ring-2 focus:ring-pink"
-                        value={s.comments || ''}
-                        onChange={(e) => handleInputChange(t.id, 'comments', e.target.value)}
-                        disabled={isFinalized}
-                      />
-                    </td>
-                    <td className="p-4">
-                      <input 
-                        type="number" min="0"
-                        className="w-full p-2 text-center rounded border border-gray-300 focus:ring-2 focus:ring-pink"
-                        value={s.shares || ''}
-                        onChange={(e) => handleInputChange(t.id, 'shares', e.target.value)}
-                        disabled={isFinalized}
-                      />
-                    </td>
-                    <td className="p-4 text-center font-bold text-lg text-pink border-l border-gray-100 bg-pink/5">
-                      {popScore}
                     </td>
                   </tr>
                 );

@@ -24,6 +24,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     { href: '/admin', label: 'สถานะภาพรวม', icon: <LayoutDashboard size={20} /> },
     { href: '/admin/results', label: 'คะแนนรวมทั้งหมด', icon: <Trophy size={20} /> },
     { href: '/admin/scores', label: 'จัดการคะแนน', icon: <Edit3 size={20} /> },
+    { href: '/admin/garland', label: 'คะแนนพวงมาลัย', icon: <Heart size={20} /> },
     { href: '/admin/social', label: 'คะแนนโซเชียล', icon: <Heart size={20} /> },
     { href: '/admin/report', label: 'ออกรายงาน', icon: <FileSpreadsheet size={20} /> },
     { href: '/admin/settings', label: 'ตั้งค่า & ประวัติ', icon: <Settings size={20} /> },
