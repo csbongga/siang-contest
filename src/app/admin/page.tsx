@@ -1,268 +1,182 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Navbar } from '@/components/Navbar';
-import { Trash2, Plus, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { CheckCircle2, AlertTriangle, Lock, Unlock, Clock, AlertCircle } from 'lucide-react';
 
-type Judge = { id: string; name: string; pin: string | null };
+type Judge = { id: string; name: string };
 type Team = { id: string; name: string };
+type Score = { judge_id: string; team_id: string; is_locked: boolean; submitted_at: string };
+type Social = { team_id: string };
 
-export default function AdminPage() {
-  const [password, setPassword] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
-  const [judges, setJudges] = useState<Judge[]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
-  
-  const [newJudge, setNewJudge] = useState({ id: '', name: '', pin: '' });
-  const [newTeam, setNewTeam] = useState({ id: '', name: '' });
-  
-  const [message, setMessage] = useState<{type: 'success'|'error', text: string} | null>(null);
+export default function AdminDashboard() {
+  const router = useRouter();
+  const [data, setData] = useState<{
+    judges: Judge[], teams: Team[], scores: Score[], socials: Social[], state: any
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const fetchAdminData = async (pwd: string) => {
+  const fetchData = async () => {
     try {
-      const [judgesRes, teamsRes] = await Promise.all([
-        fetch('/api/judges'), fetch('/api/teams')
+      const [jRes, tRes, sRes, socRes, stateRes] = await Promise.all([
+        fetch('/api/judges'), fetch('/api/teams'), fetch('/api/scores?all=true'), fetch('/api/social'), fetch('/api/admin/finalize')
       ]);
-      const judgesData = await judgesRes.json();
-      const teamsData = await teamsRes.json();
+      const [j, t, s, soc, state] = await Promise.all([
+        jRes.json(), tRes.json(), sRes.json(), socRes.json(), stateRes.json()
+      ]);
       
-      setJudges(judgesData.judges || []);
-      setTeams(teamsData.teams || []);
-      setIsAuthenticated(true);
-      setMessage(null);
+      setData({
+        judges: j.judges || [],
+        teams: t.teams || [],
+        scores: s.scores || [],
+        socials: soc.social_votes || [],
+        state: state.state || { is_finalized: false }
+      });
     } catch (e) {
-      setMessage({ type: 'error', text: 'Error fetching data' });
+      console.error(e);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    fetchAdminData(password);
-  };
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 10000); // Auto-refresh 10s
+    return () => clearInterval(interval);
+  }, []);
 
-  const callApi = async (url: string, method: string, body?: any) => {
-    const res = await fetch(url, {
-      method,
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${password}`
-      },
-      body: body ? JSON.stringify(body) : undefined
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Request failed');
-    return data;
-  };
-
-  const handleAddJudge = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await callApi('/api/judges', 'POST', newJudge);
-      setMessage({ type: 'success', text: 'เพิ่มกรรมการสำเร็จ' });
-      setNewJudge({ id: '', name: '', pin: '' });
-      fetchAdminData(password);
-    } catch (err: any) {
-      setMessage({ type: 'error', text: err.message });
-    }
-  };
-
-  const handleDeleteJudge = async (id: string) => {
-    if (!confirm('ยืนยันการลบกรรมการ? (คะแนนที่เคยให้จะถูกลบด้วย)')) return;
-    try {
-      await callApi(`/api/judges?id=${id}`, 'DELETE');
-      setMessage({ type: 'success', text: 'ลบกรรมการสำเร็จ' });
-      fetchAdminData(password);
-    } catch (err: any) {
-      setMessage({ type: 'error', text: err.message });
-    }
-  };
-
-  const handleAddTeam = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await callApi('/api/teams', 'POST', newTeam);
-      setMessage({ type: 'success', text: 'เพิ่มทีมสำเร็จ' });
-      setNewTeam({ id: '', name: '' });
-      fetchAdminData(password);
-    } catch (err: any) {
-      setMessage({ type: 'error', text: err.message });
-    }
-  };
-
-  const handleDeleteTeam = async (id: string) => {
-    if (!confirm('ยืนยันการลบทีม? (คะแนนที่ได้รับจะถูกลบด้วย)')) return;
-    try {
-      await callApi(`/api/teams?id=${id}`, 'DELETE');
-      setMessage({ type: 'success', text: 'ลบทีมสำเร็จ' });
-      fetchAdminData(password);
-    } catch (err: any) {
-      setMessage({ type: 'error', text: err.message });
-    }
-  };
-
-  const handleResetScores = async () => {
-    const code = prompt('หากต้องการล้างคะแนนทั้งหมด พิมพ์ "RESET"');
-    if (code !== 'RESET') return;
-    try {
-      await callApi('/api/admin/reset', 'POST');
-      setMessage({ type: 'success', text: 'ล้างคะแนนทั้งหมดสำเร็จ' });
-    } catch (err: any) {
-      setMessage({ type: 'error', text: err.message });
-    }
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen">
-        <Navbar />
-        <main className="max-w-md mx-auto px-4 py-16">
-          <div className="bg-cream p-8 rounded-2xl shadow-xl">
-            <h2 className="font-display text-2xl font-bold text-aubergine mb-6 text-center">เข้าสู่ระบบผู้ดูแลระบบ</h2>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">รหัสผ่าน (Admin Password)</label>
-                <input 
-                  type="password" 
-                  className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              <button 
-                type="submit"
-                className="w-full bg-pink text-white font-bold py-3 rounded-lg hover:bg-pink/90 transition-colors"
-              >
-                เข้าสู่ระบบ
-              </button>
-            </form>
-          </div>
-        </main>
-      </div>
-    );
+  if (loading || !data) {
+    return <div className="text-center py-20 animate-pulse font-display text-2xl">กำลังโหลดข้อมูล...</div>;
   }
 
-  return (
-    <div className="pb-24">
-      <Navbar />
-      
-      <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-        <div className="flex justify-between items-center">
-          <h2 className="font-display text-3xl font-bold text-gold">จัดการระบบ (Admin)</h2>
-          <button 
-            onClick={() => { setIsAuthenticated(false); setPassword(''); }}
-            className="text-sm bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors"
-          >
-            ออกจากระบบ
-          </button>
-        </div>
+  const { judges, teams, scores, socials, state } = data;
+  const totalExpected = teams.length * judges.length;
+  const totalSubmitted = scores.length;
+  const fullyScoredTeams = teams.filter(t => scores.filter(s => s.team_id === t.id).length === judges.length).length;
+  const isAllSocialsEntered = socials.length === teams.length;
 
-        {message && (
-          <div className={`p-4 rounded-xl flex items-center gap-3 ${message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-            {message.type === 'success' ? <CheckCircle2 /> : <AlertCircle />}
-            <span className="font-medium">{message.text}</span>
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-end">
+        <div>
+          <h1 className="font-display text-3xl font-bold text-gold">แดชบอร์ดสถานะ</h1>
+          <p className="text-gray-300 mt-1">อัปเดตอัตโนมัติทุก 10 วินาที</p>
+        </div>
+        {state.is_finalized && (
+          <div className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 shadow-lg">
+            <Lock size={20} /> ระบบถูกล็อกผลแล้ว
           </div>
         )}
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* จัดการทีม */}
-          <section className="bg-cream rounded-2xl p-6 text-aubergine shadow-xl">
-            <h3 className="font-display text-xl font-bold mb-4 border-b pb-2">จัดการทีมแข่งขัน</h3>
-            
-            <form onSubmit={handleAddTeam} className="mb-6 space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
-              <h4 className="font-bold text-sm text-gray-500">เพิ่มทีมใหม่</h4>
-              <div className="flex gap-2">
-                <input 
-                  placeholder="ID (เช่น t4)" 
-                  className="w-1/3 p-2 rounded-md border text-sm" 
-                  value={newTeam.id} onChange={e => setNewTeam({...newTeam, id: e.target.value})} required 
-                />
-                <input 
-                  placeholder="ชื่อทีม" 
-                  className="flex-1 p-2 rounded-md border text-sm" 
-                  value={newTeam.name} onChange={e => setNewTeam({...newTeam, name: e.target.value})} required 
-                />
-              </div>
-              <button type="submit" className="w-full bg-cyan text-aubergine font-bold py-2 rounded-md hover:bg-cyan/90 flex justify-center items-center gap-2">
-                <Plus size={18} /> เพิ่มทีม
-              </button>
-            </form>
-
-            <ul className="space-y-2 max-h-64 overflow-y-auto pr-2">
-              {teams.map(team => (
-                <li key={team.id} className="flex justify-between items-center p-3 bg-white rounded-lg border border-gray-100 shadow-sm">
-                  <div>
-                    <span className="font-bold text-sm text-pink mr-2">[{team.id}]</span>
-                    <span className="font-medium">{team.name}</span>
-                  </div>
-                  <button onClick={() => handleDeleteTeam(team.id)} className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded">
-                    <Trash2 size={18} />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          {/* จัดการกรรมการ */}
-          <section className="bg-cream rounded-2xl p-6 text-aubergine shadow-xl">
-            <h3 className="font-display text-xl font-bold mb-4 border-b pb-2">จัดการกรรมการ</h3>
-            
-            <form onSubmit={handleAddJudge} className="mb-6 space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
-              <h4 className="font-bold text-sm text-gray-500">เพิ่มกรรมการใหม่</h4>
-              <div className="flex gap-2">
-                <input 
-                  placeholder="ID (เช่น j4)" 
-                  className="w-1/3 p-2 rounded-md border text-sm" 
-                  value={newJudge.id} onChange={e => setNewJudge({...newJudge, id: e.target.value})} required 
-                />
-                <input 
-                  placeholder="ชื่อกรรมการ" 
-                  className="flex-1 p-2 rounded-md border text-sm" 
-                  value={newJudge.name} onChange={e => setNewJudge({...newJudge, name: e.target.value})} required 
-                />
-              </div>
-              <input 
-                placeholder="PIN (4 หลัก) หรือเว้นว่าง" 
-                className="w-full p-2 rounded-md border text-sm" 
-                maxLength={4}
-                value={newJudge.pin} onChange={e => setNewJudge({...newJudge, pin: e.target.value})} 
-              />
-              <button type="submit" className="w-full bg-gold text-aubergine font-bold py-2 rounded-md hover:bg-gold/90 flex justify-center items-center gap-2">
-                <Plus size={18} /> เพิ่มกรรมการ
-              </button>
-            </form>
-
-            <ul className="space-y-2 max-h-64 overflow-y-auto pr-2">
-              {judges.map(judge => (
-                <li key={judge.id} className="flex justify-between items-center p-3 bg-white rounded-lg border border-gray-100 shadow-sm">
-                  <div>
-                    <span className="font-bold text-sm text-pink mr-2">[{judge.id}]</span>
-                    <span className="font-medium">{judge.name}</span>
-                    {judge.pin && <span className="ml-2 text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded">PIN: ***</span>}
-                  </div>
-                  <button onClick={() => handleDeleteJudge(judge.id)} className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded">
-                    <Trash2 size={18} />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        </div>
-
-        <section className="bg-red-900/40 border border-red-500/50 rounded-2xl p-6 text-white shadow-xl mt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div>
-            <h3 className="font-display text-xl font-bold text-red-400 mb-1">ล้างคะแนนทั้งหมด (Danger Zone)</h3>
-            <p className="text-sm text-gray-300">ลบข้อมูลคะแนนที่ให้แล้วทั้งหมด จะไม่สามารถกู้คืนได้</p>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-cream/10 border border-white/20 p-6 rounded-2xl backdrop-blur-sm">
+          <p className="text-gray-300 text-sm font-bold mb-2">ส่งคะแนนกรรมการแล้ว</p>
+          <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-black text-cyan">{totalSubmitted}</span>
+            <span className="text-xl text-gray-400">/ {totalExpected} รายการ</span>
           </div>
-          <button 
-            onClick={handleResetScores}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition-colors whitespace-nowrap"
-          >
-            ล้างคะแนนทั้งหมด
-          </button>
-        </section>
-      </main>
+        </div>
+        <div className="bg-cream/10 border border-white/20 p-6 rounded-2xl backdrop-blur-sm">
+          <p className="text-gray-300 text-sm font-bold mb-2">ทีมที่ได้คะแนนกรรมการครบ</p>
+          <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-black text-pink">{fullyScoredTeams}</span>
+            <span className="text-xl text-gray-400">/ {teams.length} ทีม</span>
+          </div>
+        </div>
+        <div className="bg-cream/10 border border-white/20 p-6 rounded-2xl backdrop-blur-sm">
+          <p className="text-gray-300 text-sm font-bold mb-2">สถานะคะแนนโซเชียล</p>
+          <div className="flex items-baseline gap-2 mt-2">
+            {isAllSocialsEntered ? (
+              <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 border border-green-500/30">
+                <CheckCircle2 size={16} /> กรอกครบทุกทีมแล้ว
+              </span>
+            ) : (
+              <span className="bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 border border-orange-500/30">
+                <AlertTriangle size={16} /> ขาดอีก {teams.length - socials.length} ทีม
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Warning Banner */}
+      {(totalSubmitted < totalExpected || !isAllSocialsEntered) && (
+        <div className="bg-orange-900/40 border border-orange-500/50 p-4 rounded-xl flex items-start gap-3">
+          <AlertCircle className="text-orange-400 shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-bold text-orange-400">ยังไม่ควรประกาศผล</h4>
+            <p className="text-sm text-gray-300 mt-1">
+              ยังมีกรรมการส่งคะแนนไม่ครบ หรือยังกรอกคะแนนโซเชียลไม่ครบทุกทีม หากรีบประมวลผลอันดับอาจคลาดเคลื่อน
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Status Matrix */}
+      <div className="bg-cream rounded-2xl p-6 text-aubergine shadow-xl overflow-x-auto">
+        <h3 className="font-display text-xl font-bold mb-4">ตารางสถานะส่งคะแนน</h3>
+        <table className="w-full text-sm text-left border-collapse min-w-[600px]">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="p-3 border border-gray-200 font-bold whitespace-nowrap sticky left-0 bg-gray-100 z-10">ทีม / กรรมการ</th>
+              {judges.map(j => (
+                <th key={j.id} className="p-3 border border-gray-200 font-bold text-center">
+                  <div className="text-xs text-pink">[{j.id}]</div>
+                  {j.name}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {teams.map(t => (
+              <tr key={t.id} className="hover:bg-gray-50">
+                <td className="p-3 border border-gray-200 font-medium sticky left-0 bg-white group-hover:bg-gray-50 z-10">
+                  <span className="text-xs text-pink mr-1">[{t.id}]</span> {t.name}
+                </td>
+                {judges.map(j => {
+                  const score = scores.find(s => s.team_id === t.id && s.judge_id === j.id);
+                  let status = 'none';
+                  if (score) {
+                    status = score.is_locked ? 'locked' : 'unlocked';
+                  }
+
+                  return (
+                    <td 
+                      key={`${t.id}-${j.id}`} 
+                      className="p-3 border border-gray-200 text-center cursor-pointer transition-colors hover:bg-pink/10"
+                      onClick={() => router.push(`/admin/scores?team=${t.id}&judge=${j.id}`)}
+                    >
+                      {status === 'locked' && (
+                        <div className="inline-flex items-center justify-center w-8 h-8 bg-green-100 text-green-600 rounded-full" title="ส่งแล้ว">
+                          <CheckCircle2 size={18} />
+                        </div>
+                      )}
+                      {status === 'unlocked' && (
+                        <div className="inline-flex items-center justify-center w-8 h-8 bg-yellow-100 text-yellow-600 rounded-full" title="ปลดล็อกรอส่งใหม่">
+                          <Unlock size={18} />
+                        </div>
+                      )}
+                      {status === 'none' && (
+                        <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 text-gray-400 rounded-full" title="ยังไม่ส่ง">
+                          <Clock size={18} />
+                        </div>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        
+        <div className="mt-4 flex gap-4 text-sm font-medium justify-center bg-gray-50 p-3 rounded-lg border border-gray-200">
+          <div className="flex items-center gap-1"><div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center text-green-600"><CheckCircle2 size={10} /></div> ส่งแล้ว (ล็อก)</div>
+          <div className="flex items-center gap-1"><div className="w-4 h-4 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600"><Unlock size={10} /></div> ปลดล็อกรอส่งใหม่</div>
+          <div className="flex items-center gap-1"><div className="w-4 h-4 bg-gray-100 rounded-full flex items-center justify-center text-gray-400"><Clock size={10} /></div> ยังไม่ส่ง</div>
+        </div>
+      </div>
     </div>
   );
 }

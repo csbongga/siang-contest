@@ -18,6 +18,7 @@ export default function JudgePage() {
   
   const [selectedTeam, setSelectedTeam] = useState<string>('');
   const [scoredTeams, setScoredTeams] = useState<string[]>([]);
+  const [locks, setLocks] = useState<Record<string, boolean>>({});
   
   const [scores, setScores] = useState({ c1: 0, c2: 0, c3: 0, c4: 0, c5: 0, c6: 0, c7: 0 });
   const [note, setNote] = useState('');
@@ -34,7 +35,10 @@ export default function JudgePage() {
     if (judgeVerified && selectedJudge) {
       fetch(`/api/scores?judge_id=${selectedJudge}`)
         .then(res => res.json())
-        .then(data => setScoredTeams(data.scored_teams || []));
+        .then(data => {
+          setScoredTeams(data.scored_teams || []);
+          setLocks(data.locks || {});
+        });
     }
   }, [judgeVerified, selectedJudge]);
 
@@ -95,8 +99,12 @@ export default function JudgePage() {
         if (!scoredTeams.includes(selectedTeam)) {
           setScoredTeams([...scoredTeams, selectedTeam]);
         }
+        setLocks({ ...locks, [selectedTeam]: true });
         // ซ่อนกล่องเด้งหลังจาก 3 วินาที
-        setTimeout(() => setMessage(null), 3000);
+        setTimeout(() => {
+          setMessage(null);
+          setSelectedTeam('');
+        }, 3000);
       } else {
         setMessage({ type: 'error', text: data.error || 'เกิดข้อผิดพลาด' });
       }
@@ -184,11 +192,14 @@ export default function JudgePage() {
                 onChange={(e) => setSelectedTeam(e.target.value)}
               >
                 <option value="">-- เลือกทีม --</option>
-                {teams.map(t => (
-                  <option key={t.id} value={t.id}>
-                    {t.name} {scoredTeams.includes(t.id) ? ' (ให้คะแนนแล้ว)' : ''}
-                  </option>
-                ))}
+                {teams.map(t => {
+                  const isLocked = locks[t.id];
+                  return (
+                    <option key={t.id} value={t.id} disabled={isLocked} className={isLocked ? "text-gray-400 bg-gray-100" : ""}>
+                      {t.name} {isLocked ? ' 🔒 (ส่งคะแนนแล้ว)' : (scoredTeams.includes(t.id) ? ' (มีข้อมูลร่าง)' : '')}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
