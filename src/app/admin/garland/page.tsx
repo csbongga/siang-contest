@@ -121,7 +121,7 @@ export default function AdminGarlandPage() {
 
       <div className="bg-white rounded-2xl shadow-xl overflow-hidden text-aubergine">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left min-w-[800px]">
+          <table className="w-full text-sm text-left">
             <thead>
               <tr className="bg-gray-100 border-b border-gray-200 text-center">
                 <th className="p-4 font-bold text-left">ทีม</th>
@@ -137,7 +137,7 @@ export default function AdminGarlandPage() {
 
                 return (
                   <tr key={t.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="p-4 font-medium sticky left-0 bg-white group-hover:bg-gray-50 z-10">
+                    <td className="p-4 font-medium md:sticky md:left-0 bg-white group-hover:bg-gray-50 md:z-10">
                       <span className="text-xs text-pink mr-2">[{t.id}]</span>
                       {t.name}
                     </td>
