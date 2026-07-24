@@ -24,6 +24,7 @@ export default function JudgePage() {
   const [note, setNote] = useState('');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [message, setMessage] = useState<{type: 'success'|'error', text: string} | null>(null);
 
   useEffect(() => {
@@ -80,8 +81,13 @@ export default function JudgePage() {
     setMessage(null);
   };
 
+  const handleConfirmClick = () => {
+    setShowConfirmModal(true);
+  };
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
+    setShowConfirmModal(false);
     try {
       const res = await fetch('/api/scores', {
         method: 'POST',
@@ -280,7 +286,7 @@ export default function JudgePage() {
 
                 <div className="pt-6 pb-20">
                   <button 
-                    onClick={handleSubmit}
+                    onClick={handleConfirmClick}
                     disabled={isSubmitting}
                     className="w-full bg-gradient-to-r from-pink to-gold text-white font-display font-bold text-2xl py-5 rounded-2xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all disabled:opacity-70 disabled:scale-100 flex items-center justify-center gap-3"
                   >
@@ -292,6 +298,59 @@ export default function JudgePage() {
           </div>
         )}
       </main>
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white text-aubergine rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="bg-aubergine p-4 text-center">
+              <h2 className="font-display font-bold text-2xl text-white">ยืนยันการบันทึกคะแนน</h2>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="text-center mb-6">
+                <p className="text-gray-500">ทีมที่เลือก</p>
+                <p className="font-display font-bold text-2xl text-pink">{teams.find(t => t.id === selectedTeam)?.name}</p>
+              </div>
+              
+              <div className="space-y-2 text-lg">
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-gray-600">A. การแสดงของ Dancer</span>
+                  <span className="font-bold text-gold">{totalDancer} / 70</span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-gray-600">B. การแสดงของนักร้อง</span>
+                  <span className="font-bold text-cyan">{totalSinger} / 30</span>
+                </div>
+                <div className="flex justify-between pt-2">
+                  <span className="font-bold">คะแนนรวมสุทธิ</span>
+                  <span className="font-black text-2xl text-aubergine">{grandTotal} / 100</span>
+                </div>
+              </div>
+
+              {note && (
+                <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm italic text-gray-600 border border-gray-200">
+                  <span className="font-bold not-italic">Note:</span> {note}
+                </div>
+              )}
+            </div>
+            
+            <div className="flex p-4 gap-3 bg-gray-50">
+              <button 
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 py-3 font-bold text-gray-600 bg-gray-200 hover:bg-gray-300 rounded-xl transition-colors"
+              >
+                ยกเลิก
+              </button>
+              <button 
+                onClick={handleSubmit}
+                className="flex-1 py-3 font-bold text-white bg-green-500 hover:bg-green-600 rounded-xl transition-colors shadow-md"
+              >
+                ยืนยันการบันทึก
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Floating Total Score Bar */}
       {judgeVerified && selectedTeam && (
